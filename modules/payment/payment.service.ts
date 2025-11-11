@@ -62,6 +62,7 @@ const makePaymentWithSSLCOMMERZ = async (req: Request) => {
         id: Number(bookingId),
       },
       data: {
+        paymentMethod: "SSLCOMMERZ",
         transactionId,
       },
     });
@@ -72,4 +73,31 @@ const makePaymentWithSSLCOMMERZ = async (req: Request) => {
       redirectUrl: initResponse.GatewayPageURL,
     };
   }
+};
+
+const makePaymentWithCash = async (req: Request) => {
+  const { bookingId } = req.params;
+
+  const booking = await prisma.booking.update({
+    where: {
+      id: Number(bookingId),
+    },
+    data: {
+      paymentMethod: "CASH",
+    },
+  });
+
+  return {
+    success: true,
+    message: "Pay with cash and make sure to confirm booking",
+    booking,
+  };
+};
+
+const makePaymentWithStripe = async (req: Request) => {};
+
+export const paymentService = {
+  makePaymentWithSSLCOMMERZ,
+  makePaymentWithCash,
+  makePaymentWithStripe,
 };
