@@ -1,0 +1,4 @@
+import app from "./app.js";
+import { env } from "./config/dotenv.js";
+app.listen(env.PORT, () => console.log(`Server is running on port ${env.PORT}`));
+//# sourceMappingURL=server.js.map
