@@ -1,3 +1,0 @@
-import { PrismaClient } from "@prisma/client";
-export declare const getPrisma: () => PrismaClient<import("@prisma/client").Prisma.PrismaClientOptions, never, import("@prisma/client/runtime/library").DefaultArgs>;
-//# sourceMappingURL=prisma.d.ts.map
