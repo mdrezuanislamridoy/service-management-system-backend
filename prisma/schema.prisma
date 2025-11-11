@@ -67,5 +67,6 @@ model Booking {
   isPaid Boolean @default(false)
   paymentMethod PaymentMethod @default(CASH)
   status BookingStatus @default(PENDING)
+  transactionId String?
 }
 

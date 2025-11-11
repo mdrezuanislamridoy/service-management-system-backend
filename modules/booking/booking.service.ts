@@ -30,11 +30,20 @@ const addBooking = async (req: Request) => {
     },
   });
 
+  let redirectUrl = (): string => {
+    if (paymentMethod === "sslcommerz") {
+      return `/payment/sslcommerz/${booking.id}`;
+    } else if (paymentMethod === "stripe") {
+      return `/payment/stripe/${booking.id}`;
+    }
+    return `/payment/cash/${booking.id}`;
+  };
+
   return {
     success: true,
     message: "Booking created successfully",
     booking,
-    redirectUrl: `/payment/pay-bill/${serviceId}`,
+    redirectUrl,
   };
 };
 
