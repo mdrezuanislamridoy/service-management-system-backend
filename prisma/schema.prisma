@@ -21,6 +21,11 @@ enum BookingStatus {
   CANCELED
 }
 
+enum PaymentMethod {
+  CASH
+  SSLCOMMERZ
+  STRIPE
+}
 
 
 model User {
@@ -49,10 +54,8 @@ model Service {
   category String
   locaiton String
   price Int 
-  availability Boolean
-
+  availability Boolean @default(true)
   bookings Booking[]
-
 }
 
 model Booking {
@@ -61,6 +64,8 @@ model Booking {
   user User @relation(fields:[userId] , references:[id])
   serviceId Int 
   service Service @relation(fields :[serviceId] , references:[id])
+  isPaid Boolean @default(false)
+  paymentMethod PaymentMethod @default(CASH)
   status BookingStatus @default(PENDING)
 }
 
