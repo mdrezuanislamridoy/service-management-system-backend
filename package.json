@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
-  "scripts": {
-    "dev": "ts-node-dev --respawn src/server.ts",
-    "build": "tsc",
-    "start": "npm run build && prisma generate && node dist/server.js",
-    "migrate": "npx prisma migrate deploy",
-    "studio": "npx prisma studio"
-  },
+"scripts": {
+  "dev": "ts-node-dev --respawn src/server.ts",
+  "build": "tsc",
+  "start": "npm run build && prisma generate && node dist/server.js",
+  "migrate": "npx prisma migrate deploy"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
