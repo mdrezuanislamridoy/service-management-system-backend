@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
-"scripts": {
-  "dev": "ts-node-dev --respawn src/server.ts",
-  "build": "tsc",
-  "start": "npm run build && prisma generate && node dist/server.js",
-  "migrate": "npx prisma migrate deploy"
-},
+  "scripts": {
+    "dev": "node init && ts-node-dev --respawn src/server.ts",
+    "build": "node init && tsc",
+    "start": "node init && npm run build && prisma generate && node dist/server.js",
+    "migrate": "npx prisma migrate deploy"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -24,12 +24,13 @@
     "cloudinary": "^2.8.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
+    "dotenv": "^8.2.0",
     "express": "^5.1.0",
     "http-errors": "^2.0.0",
     "http-status-codes": "^2.3.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
+    "node-fetch": "^3.3.2",
     "nodemon": "^3.1.10",
     "prisma": "^6.19.0",
     "sslcommerz-lts": "^1.2.0",
