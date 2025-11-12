@@ -48,7 +48,6 @@ model User {
   status        ProviderStatus?  @default(PENDING)
   avatar        String?
   createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
 
   services      Service[]
   bookings      Booking[]

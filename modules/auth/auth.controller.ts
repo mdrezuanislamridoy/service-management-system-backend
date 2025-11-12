@@ -6,6 +6,7 @@ import {
   logoutService,
   refreshAccessToken,
 } from "./auth.service.js";
+import { StatusCodes } from "http-status-codes";
 
 export const registerUser = async (
   req: Request,
@@ -31,7 +32,11 @@ export const loginUser = async (
       httpOnly: true,
       secure: true,
     });
-    res.json(result);
+    res.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+    res.status(StatusCodes.OK).json(result);
   } catch (err) {
     next(err);
   }
