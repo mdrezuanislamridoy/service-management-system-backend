@@ -49,6 +49,10 @@ const login = async (req: Request) => {
     where: { email },
   });
 
+  if (user?.role ==="PROVIDER" &&user?.status==="PENDING") {
+    
+  }
+
   if (!user) {
     throw createHttpError(400, "User not found");
   }

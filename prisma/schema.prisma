@@ -27,6 +27,12 @@ enum PaymentMethod {
   STRIPE
 }
 
+enum ProviderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 
 model User {
   id        Int     @id @default(autoincrement())
@@ -38,6 +44,7 @@ model User {
   createdAt DateTime @default(now())
   // provider have services
   services Service[]
+  status ProviderStatus @default(PENDING)
 
   //user have bookings
   bookings Booking[]
@@ -51,7 +58,7 @@ model Service {
 
   title String
   description String?
-  category String
+  category Category
   locaiton String
   price Int 
   availability Boolean @default(true)
@@ -70,3 +77,7 @@ model Booking {
   transactionId String?
 }
 
+
+model Category{
+  name String
+}
