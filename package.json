@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "ts-node-dev --respawn src/server.ts",
     "build": "tsc",
-    "start": "prisma generate && nodemon dist/server.js",
-    "migrate": "npx prisma migrate dev",
+    "start": "npm run build && prisma generate && node dist/server.js",
+    "migrate": "npx prisma migrate deploy",
     "studio": "npx prisma studio"
   },
   "keywords": [],
