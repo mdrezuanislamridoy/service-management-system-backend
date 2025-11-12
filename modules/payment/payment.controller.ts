@@ -1,41 +1,24 @@
-import type { NextFunction, Request, Response } from "express";
-import { paymentService } from "./payment.service.js";
+import type { Request, Response, NextFunction } from "express";
+import { payWithSSLCOMMERZ, payWithCash } from "./payment.service.js";
 
-export const payBillWithSSLCommerz = async (
+export const sslcommerz = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const result = await paymentService.makePaymentWithSSLCOMMERZ(req);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
+    const result = await payWithSSLCOMMERZ(req);
+    res.json(result);
+  } catch (err) {
+    next(err);
   }
 };
 
-export const payBillWithCash = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const cash = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await paymentService.makePaymentWithCash(req);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const payBillWithStripe = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const result = await paymentService.makePaymentWithStripe(req);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
+    const result = await payWithCash(req);
+    res.json(result);
+  } catch (err) {
+    next(err);
   }
 };

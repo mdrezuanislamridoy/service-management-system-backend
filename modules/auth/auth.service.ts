@@ -1,117 +1,123 @@
-import type { Request } from "express";
-import createHttpError from "http-errors";
+import type { Request, Response } from "express";
 import bcrypt from "bcrypt";
+import createHttpError from "http-errors";
 import { getPrisma } from "../../utils/prisma.js";
-import { Role } from "@prisma/client";
 import generateToken from "../../utils/generateToken.js";
+import jwt from "jsonwebtoken";
 
 const prisma = getPrisma();
 
-const createUser = async (req: Request) => {
-  const { name, email, password } = req.body;
-  if (!name || !email || !password) {
-    throw createHttpError(400, "All fields are required");
-  }
+export const register = async (req: Request) => {
+  const { name, email, password, role = "USER" } = req.body;
+  if (!name || !email || !password)
+    throw createHttpError(400, "All fields required");
 
-  const isUser = await prisma.user.findUnique({
-    where: { email },
-  });
-  if (isUser) {
-    throw createHttpError(400, "User already exists");
-  }
+  const exists = await prisma.user.findUnique({ where: { email } });
+  if (exists) throw createHttpError(400, "User exists");
 
-  const hashedPass = await bcrypt.hash(password, 10);
-
+  const hashed = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPass,
-      role: Role.USER,
-    },
+    data: { name, email, password: hashed, role },
   });
 
   return {
     success: true,
-    message: "User created successfully",
-    user,
+    message: "User created",
+    user: { id: user.id, name, email, role },
   };
 };
 
-const login = async (req: Request) => {
+export const login = async (req: Request) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    throw createHttpError(400, "All fields are required");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (user?.role ==="PROVIDER" &&user?.status==="PENDING") {
-    
-  }
-
-  if (!user) {
-    throw createHttpError(400, "User not found");
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-
-  if (!isMatch) {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !(await bcrypt.compare(password, user.password))) {
     throw createHttpError(400, "Invalid credentials");
   }
 
-  const userWithoutPass = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-  };
+  if (user.role === "PROVIDER" && user.status === "PENDING") {
+    throw createHttpError(403, "Provider not approved yet");
+  }
 
-  const accessToken = generateToken({
-    id: user.id,
-    role: user.role,
-  });
-  const refreshToken = generateToken({
-    id: user.id,
-    role: user.role,
-  });
+  const accessToken = generateToken({ id: user.id });
+  const refreshToken = generateToken({ id: user.id }, "7d");
 
   await prisma.user.update({
-    where: {
-      id: user.id,
-    },
-    data: {
-      refresh_token: refreshToken,
-    },
+    where: { id: user.id },
+    data: { refreshToken },
   });
 
   return {
     success: true,
-    message: "User logged in successfully",
-    user: userWithoutPass,
+    user: { id: user.id, name: user.name, email, role: user.role },
     accessToken,
     refreshToken,
   };
 };
 
-const getProfile = async (req: Request) => {
+export const getProfile = async (req: Request) => {
   const user = req.user;
-
-  const userWithoutPass = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-  };
-
   return {
     success: true,
-    message: "User profile fetched successfully",
-    user: userWithoutPass,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+    },
   };
 };
 
-export const authService = { createUser, login, getProfile };
+export const refreshAccessToken = async (req: Request) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) throw createHttpError(401, "Refresh token required");
+
+  let decoded: any;
+  try {
+    decoded = jwt.verify(refreshToken, process.env.JWT_SECRET!) as {
+      id: number;
+    };
+  } catch {
+    throw createHttpError(403, "Invalid refresh token");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: decoded.id },
+    select: {
+      id: true,
+      refreshToken: true,
+      name: true,
+      email: true,
+      role: true,
+      avatar: true,
+    },
+  });
+
+  if (!user || user.refreshToken !== refreshToken) {
+    throw createHttpError(403, "Invalid refresh token");
+  }
+
+  const newAccessToken = generateToken({ id: user.id }, "15m");
+
+  const newRefreshToken = generateToken({ id: user.id }, "7d");
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { refreshToken: newRefreshToken },
+  });
+
+  return {
+    success: true,
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+  };
+};
+
+export const logoutService = async (req: Request, res: Response) => {
+  const { id } = req.user;
+  await prisma.user.update({ where: { id }, data: { refreshToken: null } });
+
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+
+  return { success: true, message: "Logout successful" };
+};

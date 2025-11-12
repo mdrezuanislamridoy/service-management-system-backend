@@ -1,21 +1,12 @@
 import { Router } from "express";
-import { addBooking, getMyBookings } from "./booking.controller.js";
-import userMiddleware from "../../middlewares/user.middleware.js";
-import checkRole from "../../middlewares/role.middleware.js";
+
+import { bookService, changeStatus } from "./booking.controller.js";
+import userMiddleware from "../../middlewares/auth.js";
+import checkRole from "../../middlewares/roleCheck.js";
 
 const router = Router();
 
-router.post(
-  "/create-booking/id",
-  userMiddleware,
-  checkRole("USER"),
-  addBooking
-);
-router.get(
-  "/get-my-bookings",
-  userMiddleware,
-  checkRole("USER"),
-  getMyBookings
-);
+router.post("/", userMiddleware, bookService);
+router.patch("/:id/status", userMiddleware, checkRole("ADMIN"), changeStatus);
 
-export const bookingRouter = router;
+export { router as bookingRouter };

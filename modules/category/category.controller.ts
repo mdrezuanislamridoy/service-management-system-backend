@@ -1,29 +1,28 @@
-import type { NextFunction, Request, Response } from "express";
-import { categoryService } from "./category.service.js";
+import type { Request, Response, NextFunction } from "express";
+import { addCategory, getCategories } from "./category.service.js";
 
-export const getAllCategories = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
+export const createCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) => {
-    try {
-        const result = await categoryService.getAllCategories(req);
-        res.status(201).json(result);
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const result = await addCategory(req);
+    res.status(201).json(result);
+  } catch (err) {
+    next(err);
+  }
 };
 
-
-export const addCategory = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
+export const listCategories = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) => {
-    try {
-        const result = await categoryService.addCategory(req);
-        res.status(201).json(result);
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const result = await getCategories();
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 };

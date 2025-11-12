@@ -1,41 +1,45 @@
-import type { NextFunction, Request, Response } from "express";
-import { adminService } from "./admin.service.js";
+import type { Request, Response, NextFunction } from "express";
+import {
+  getDashboard,
+  approveProvider,
+  rejectProvider,
+} from "./admin.service.js";
 
-export const approveServiceProvider = async (
+export const dashboard = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const result = await adminService.approveServiceProvider(req);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
-  }
-};
-export const rejectServiceProvider = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const result = await adminService.rejectServiceProvider(req);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
+    const result = await getDashboard();
+    res.json(result);
+  } catch (err) {
+    next(err);
   }
 };
 
-
-export const getAllData = async (
+export const approve = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const result = await adminService.getAllData(req);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
+    const provider = await approveProvider(Number(req.params.id));
+    res.json({ success: true, provider });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const reject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const provider = await rejectProvider(Number(req.params.id));
+    res.json({ success: true, provider });
+  } catch (err) {
+    next(err);
   }
 };

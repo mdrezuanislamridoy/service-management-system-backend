@@ -1,42 +1,45 @@
-import type { NextFunction, Request, Response } from "express";
-import { serviceService } from "./service.service.js";
+import type { Request, Response, NextFunction } from "express";
+import {
+  createService,
+  getServices,
+  getMyServices,
+} from "./service.service.js";
 
-export const createService = async (
+export const addService = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const result = await serviceService.createService(req);
+    const result = await createService(req);
     res.status(201).json(result);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
-export const getMyServices = async (
+export const listServices = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const result = await serviceService.getMyServices(req);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
+    const result = await getServices(req);
+    res.json(result);
+  } catch (err) {
+    next(err);
   }
 };
 
-export const getAllServices = async (
+export const myServices = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const result = await serviceService.getAllServices(req);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
+    const result = await getMyServices(req);
+    res.json(result);
+  } catch (err) {
+    next(err);
   }
 };
-

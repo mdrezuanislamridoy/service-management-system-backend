@@ -1,20 +1,14 @@
 import { Router } from "express";
-import {
-  createUserAccount,
-  getUserProfile,
-  loginUserAccount,
-  logout,
-} from "./auth.controller.js";
-
-import userMiddleware from "../../middlewares/user.middleware.js";
-import validator from "../../middlewares/validator.js";
-import { createUserSchema } from "./auth.validator.js";
+import { registerUser, loginUser, profile, logout } from "./auth.controller.js";
+import userMiddleware from "../../middlewares/auth.js";
+import { refreshAccessToken } from "./auth.service.js";
 
 const router = Router();
 
-router.post("/create-user", validator(createUserSchema), createUserAccount);
-router.post("/login-user", loginUserAccount);
-router.get("/user-profile", userMiddleware, getUserProfile);
+router.post("/register", registerUser);
+router.post("/login", loginUser);
+router.get("/profile", userMiddleware, profile);
 router.post("/logout", userMiddleware, logout);
+router.patch("/refresh-token", userMiddleware, refreshAccessToken);
 
-export const authRouter = router;
+export { router as authRouter };

@@ -1,22 +1,12 @@
 import { Router } from "express";
-import userMiddleware from "../../middlewares/user.middleware.js";
-import checkRole from "../../middlewares/role.middleware.js";
-import { addCategory } from "./category.controller.js";
+
+import { createCategory, listCategories } from "./category.controller.js";
+import userMiddleware from "../../middlewares/auth.js";
+import checkRole from "../../middlewares/roleCheck.js";
 
 const router = Router();
 
-router.post(
-  "/create-category",
-  userMiddleware,
-  checkRole("ADMIN"),
-  addCategory
-);
+router.post("/", userMiddleware, checkRole("ADMIN"), createCategory);
+router.get("/", listCategories);
 
-router.get(
-  "/get-all-categories",
-  userMiddleware,
-  checkRole("ADMIN"),
-  addCategory
-);
-
-export const categoryRouter = router;
+export { router as categoryRouter };

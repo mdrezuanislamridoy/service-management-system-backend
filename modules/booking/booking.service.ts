@@ -1,67 +1,45 @@
 import type { Request } from "express";
 import { getPrisma } from "../../utils/prisma.js";
 import createHttpError from "http-errors";
-import { StatusCodes } from "http-status-codes";
 
 const prisma = getPrisma();
 
-const addBooking = async (req: Request) => {
+export const createBooking = async (req: Request) => {
   const userId = req.user.id;
-  const serviceId = Number(req.params.id);
-  const { paymentMethod } = req.body;
+  const { serviceId, paymentMethod = "CASH" } = req.body;
+
+  const service = await prisma.service.findUnique({
+    where: { id: Number(serviceId) },
+  });
+  if (!service?.isActive) throw createHttpError(400, "Service unavailable");
 
   const booking = await prisma.booking.create({
     data: {
       userId,
-      serviceId,
+      serviceId: service.id,
       paymentMethod,
+      totalAmount: service.price,
+      status: paymentMethod === "CASH" ? "PENDING" : "PENDING",
     },
   });
-  await prisma.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      bookings: {
-        connect: {
-          id: booking.id,
-        },
-      },
-    },
-  });
-
-  let redirectUrl = (): string => {
-    if (paymentMethod === "sslcommerz") {
-      return `/payment/sslcommerz/${booking.id}`;
-    } else if (paymentMethod === "stripe") {
-      return `/payment/stripe/${booking.id}`;
-    }
-    return `/payment/cash/${booking.id}`;
-  };
 
   return {
     success: true,
-    message: "Booking created successfully",
     booking,
-    redirectUrl,
+    redirectUrl: `/api/v1/payments/${paymentMethod.toLowerCase()}/${
+      booking.id
+    }`,
   };
 };
 
-const getMyBookings = async (req: Request) => {
-  const userId = req.user.id;
-  const bookings = await prisma.booking.findMany({
-    where: {
-      userId,
-    },
+export const updateBookingStatus = async (req: Request) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const booking = await prisma.booking.update({
+    where: { id: Number(id) },
+    data: { status },
   });
-  if (bookings.length === 0) {
-    throw createHttpError(StatusCodes.NOT_FOUND, "No bookings found");
-  }
-  return {
-    success: true,
-    message: "Bookings fetched successfully",
-    bookings,
-  };
-};
 
-export const bookingService = { addBooking, getMyBookings };
+  return { success: true, booking };
+};

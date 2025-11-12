@@ -1,26 +1,21 @@
 import { Router } from "express";
-import {
-  createService,
-  getAllServices,
-  getMyServices,
-} from "./service.controller.js";
-import userMiddleware from "../../middlewares/user.middleware.js";
-import checkRole from "../../middlewares/role.middleware.js";
+import multer from "multer";
 
+import { addService, listServices, myServices } from "./service.controller.js";
+import checkRole from "../../middlewares/roleCheck.js";
+import userMiddleware from "../../middlewares/auth.js";
+
+const upload = multer();
 const router = Router();
 
 router.post(
-  "/create-service",
+  "/",
   userMiddleware,
   checkRole("PROVIDER"),
-  createService
+  upload.array("images", 5),
+  addService
 );
-router.get(
-  "/get-my-services",
-  userMiddleware,
-  checkRole("PROVIDER"),
-  getMyServices
-);
-router.get("/get-all-services", userMiddleware, getAllServices);
+router.get("/", listServices);
+router.get("/my", userMiddleware, checkRole("PROVIDER"), myServices);
 
-export const serviceRouter = router;
+export { router as serviceRouter };

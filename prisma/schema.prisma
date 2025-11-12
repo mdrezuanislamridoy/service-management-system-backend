@@ -2,7 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -14,11 +13,17 @@ enum Role {
   ADMIN
 }
 
+enum ProviderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
 
 enum BookingStatus {
   PENDING
-  BOOKED
-  CANCELED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
 }
 
 enum PaymentMethod {
@@ -27,61 +32,91 @@ enum PaymentMethod {
   STRIPE
 }
 
-enum ProviderStatus {
+enum PaymentStatus {
   PENDING
-  APPROVED
-  REJECTED
+  SUCCESS
+  FAILED
 }
 
-
 model User {
-  id        Int     @id @default(autoincrement())
-  name      String
-  email     String  @unique
-  password  String
-  role      Role    @default(USER)
-  refresh_token String?
-  createdAt DateTime @default(now())
-  // provider have services
-  services Service[]
-  status ProviderStatus @default(PENDING)
+  id            Int              @id @default(autoincrement())
+  name          String
+  email         String           @unique
+  password      String
+  role          Role             @default(USER)
+  refreshToken  String?
+  status        ProviderStatus?  @default(PENDING)
+  avatar        String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
-  //user have bookings
-  bookings Booking[]
+  services      Service[]
+  bookings      Booking[]
+  reviews       Review[]
 }
 
 model Category {
-  id Int @id @default(autoincrement())
-  services Service[]
-  name String
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  services  Service[]
 }
 
 model Service {
-  id Int @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
+  providerId    Int
+  provider      User      @relation(fields: [providerId], references: [id])
+  categoryId    Int
+  category      Category  @relation(fields: [categoryId], references: [id])
+  title         String
+  description   String?
+  price         Float
+  location      String
+  isActive      Boolean   @default(true)
+  images        String[]  @default([])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  providerId Int 
-  provider User @relation(fields:[providerId], references:[id])
-
-  title String
-  description String?
-  categoryId Int @unique
-  category Category?  @relation(fields:[categoryId],references:[id])
-  locaiton String
-  price Int 
-  availability Boolean @default(true)
-  bookings Booking[]
+  bookings      Booking[]
+  reviews       Review[]
 }
 
 model Booking {
-  id Int @id @default(autoincrement())
-  userId Int 
-  user User @relation(fields:[userId] , references:[id])
-  serviceId Int 
-  service Service @relation(fields :[serviceId] , references:[id])
-  isPaid Boolean @default(false)
-  paymentMethod PaymentMethod @default(CASH)
-  status BookingStatus @default(PENDING)
-  transactionId String?
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  user           User          @relation(fields: [userId], references: [id])
+  serviceId      Int
+  service        Service       @relation(fields: [serviceId], references: [id])
+  status         BookingStatus @default(PENDING)
+  paymentMethod  PaymentMethod
+  totalAmount    Float
+  transactionId  String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  payment        Payment?
+  review         Review?
 }
 
+model Payment {
+  id            Int           @id @default(autoincrement())
+  bookingId     Int           @unique
+  booking       Booking       @relation(fields: [bookingId], references: [id])
+  amount        Float
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  transactionId String?
+  createdAt     DateTime      @default(now())
+}
 
+model Review {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  user       User      @relation(fields: [userId], references: [id])
+  serviceId  Int
+  service    Service   @relation(fields: [serviceId], references: [id])
+  bookingId  Int       @unique
+  booking    Booking   @relation(fields: [bookingId], references: [id])
+  rating     Int       @default(5)
+  comment    String?
+  createdAt  DateTime  @default(now())
+}

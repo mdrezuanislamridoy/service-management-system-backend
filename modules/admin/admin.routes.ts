@@ -1,31 +1,23 @@
 import { Router } from "express";
-import {
-  approveServiceProvider,
-  rejectServiceProvider,
-} from "./admin.controller.js";
-import userMiddleware from "../../middlewares/user.middleware.js";
-import checkRole from "../../middlewares/role.middleware.js";
+
+import { dashboard, approve, reject } from "./admin.controller.js";
+import userMiddleware from "../../middlewares/auth.js";
+import checkRole from "../../middlewares/roleCheck.js";
 
 const router = Router();
 
+router.get("/dashboard", userMiddleware,checkRole("ADMIN"), dashboard);
 router.patch(
-  "/approve-provider/:id",
+  "/providers/approve/:id",
   userMiddleware,
   checkRole("ADMIN"),
-  approveServiceProvider
+  approve
 );
 router.patch(
-  "/reject-provider/:id",
+  "/providers/reject/:id",
   userMiddleware,
   checkRole("ADMIN"),
-  rejectServiceProvider
+  reject
 );
 
-router.get(
-  "/get-all-data",
-  userMiddleware,
-  checkRole("ADMIN"),
-  rejectServiceProvider
-);
-
-export const adminRouter = router;
+export { router as adminRouter };

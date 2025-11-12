@@ -1,52 +1,52 @@
-import type { NextFunction, Request, Response } from "express";
-import { authService } from "./auth.service.js";
-import generateToken from "../../utils/generateToken.js";
+import type { Request, Response, NextFunction } from "express";
+import {
+  register,
+  login,
+  getProfile,
+  logoutService,
+  refreshAccessToken,
+} from "./auth.service.js";
 
-export const createUserAccount = async (
+export const registerUser = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const result = await authService.createUser(req);
+    const result = await register(req);
     res.status(201).json(result);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
-export const loginUserAccount = async (
+export const loginUser = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const result = await authService.login(req);
-
-    res
-      .status(201)
-      .cookie("access_token", result.accessToken, {
-        httpOnly: true,
-      })
-      .cookie("refresh_token", result.refreshToken, {
-        httpOnly: true,
-      })
-      .json(result);
-  } catch (error) {
-    next(error);
+    const result = await login(req);
+    res.cookie("accessToken", result.accessToken, {
+      httpOnly: true,
+      secure: true,
+    });
+    res.json(result);
+  } catch (err) {
+    next(err);
   }
 };
 
-export const getUserProfile = async (
+export const profile = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const result = await authService.getProfile(req);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
+    const result = await getProfile(req);
+    res.json(result);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -56,12 +56,22 @@ export const logout = async (
   next: NextFunction
 ) => {
   try {
-    res
-      .clearCookie("access_token")
-      .clearCookie("refresh_token")
-      .status(200)
-      .json({ message: "Logout successfully" });
-  } catch (error) {
-    next(error);
+    const result = await logoutService(req, res);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await refreshAccessToken(req);
+    res.json(result);
+  } catch (err) {
+    next(err);
   }
 };
