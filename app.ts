@@ -7,6 +7,8 @@ import { authRouter } from "./modules/auth/auth.routes.js";
 import { serviceRouter } from "./modules/services/service.routes.js";
 import { bookingRouter } from "./modules/booking/booking.routes.js";
 import { paymentRouter } from "./modules/payment/payment.routes.js";
+import { adminRouter } from "./modules/admin/admin.routes.js";
+import { categoryRouter } from "./modules/category/category.routes.js";
 
 const app = express();
 
@@ -19,6 +21,8 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/services", serviceRouter);
 app.use("/api/v1/booking", bookingRouter);
 app.use("/api/v1/payment", paymentRouter);
+app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/category", categoryRouter);
 
 app.get("/", (req, res) => {
   res.send("Server is running!");

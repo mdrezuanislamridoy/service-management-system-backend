@@ -7,16 +7,30 @@ const prisma = getPrisma();
 
 const createService = async (req: Request) => {
   const providerId = req.user.id;
+  const { categoryId } = req.body;
 
   const service = await prisma.service.create({
     data: {
       ...req.body,
+      categoryId,
       providerId,
     },
   });
   await prisma.user.update({
     where: {
       id: providerId,
+    },
+    data: {
+      services: {
+        connect: {
+          id: service.id,
+        },
+      },
+    },
+  });
+  await prisma.category.update({
+    where: {
+      id: categoryId,
     },
     data: {
       services: {

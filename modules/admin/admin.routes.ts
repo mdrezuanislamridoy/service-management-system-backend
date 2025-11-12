@@ -21,4 +21,11 @@ router.patch(
   rejectServiceProvider
 );
 
+router.get(
+  "/get-all-data",
+  userMiddleware,
+  checkRole("ADMIN"),
+  rejectServiceProvider
+);
+
 export const adminRouter = router;

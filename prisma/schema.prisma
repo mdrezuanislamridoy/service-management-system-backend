@@ -50,6 +50,12 @@ model User {
   bookings Booking[]
 }
 
+model Category {
+  id Int @id @default(autoincrement())
+  services Service[]
+  name String
+}
+
 model Service {
   id Int @id @default(autoincrement())
 
@@ -58,7 +64,8 @@ model Service {
 
   title String
   description String?
-  category Category
+  categoryId Int @unique
+  category Category?  @relation(fields:[categoryId],references:[id])
   locaiton String
   price Int 
   availability Boolean @default(true)
@@ -78,6 +85,3 @@ model Booking {
 }
 
 
-model Category{
-  name String
-}
